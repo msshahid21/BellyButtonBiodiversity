@@ -3,7 +3,7 @@ function init() {
   var selector = d3.select("#selDataset");
 
   // Use the list of sample names to populate the select options
-  d3.json("samples.json").then((data) => {
+  d3.json("static/data/samples.json").then((data) => {
     var sampleNames = data.names;
 
     sampleNames.forEach((sample) => {
@@ -32,7 +32,7 @@ function optionChanged(newSample) {
 
 // Demographics Panel 
 function buildMetadata(sample) {
-  d3.json("samples.json").then((data) => {
+  d3.json("static/data/samples.json").then((data) => {
     var metadata = data.metadata;
     // Filter the data for the object with the desired sample number
     var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
@@ -56,37 +56,45 @@ function buildMetadata(sample) {
 // 1. Create the buildCharts function.
 function buildCharts(sample) {
   // 2. Use d3.json to load and retrieve the samples.json file 
-  d3.json("samples.json").then((data) => {
+  d3.json("static/data/samples.json").then((data) => {
     // 3. Create a variable that holds the samples array. 
     var samples = data.samples;
-    console.log(samples);
 
     // 4. Create a variable that filters the samples for the object with the desired sample number.
-    var selectedSample = samples.filter(sampleObj => sampleObj.id === sample.id);
-    console.log(selectedSample);
-
-    //  5. Create a variable that holds the first sample in the array.
-    var firstSample = samples[0];
-    console.log(firstSample);
+    // 5. Create a variable that holds the first sample in the array. (combined into one line)
+    var selectedSample = samples.filter(sampleObj => sampleObj.id === sample)[0];
 
     // 6. Create variables that hold the otu_ids, otu_labels, and sample_values.
+    var otu_ids = selectedSample.otu_ids;
+    var otu_labels = selectedSample.otu_labels; 
+    var sample_values = selectedSample.sample_values;
 
+    console.log(otu_ids);
+    console.log(otu_labels);
 
     // 7. Create the yticks for the bar chart.
     // Hint: Get the the top 10 otu_ids and map them in descending order  
     //  so the otu_ids with the most bacteria are last. 
 
-    // var yticks = 
+    var yticks = otu_ids.slice(0, 10).reverse().map(function(id) {return `OTU ${id}`});
+
+    console.log(yticks);
 
     // 8. Create the trace for the bar chart. 
     var barData = [
-      
+      {
+        x: sample_values.slice(0, 10).reverse(),
+        y: yticks,
+        text: otu_labels.slice(0, 10).reverse(),
+        type: "bar",
+        orientation: "h"
+      }
     ];
     // 9. Create the layout for the bar chart. 
     var barLayout = {
-     
+      title: "Top 10 Bacteria Cultures Found",
     };
     // 10. Use Plotly to plot the data with the layout. 
-    
+    Plotly.newPlot("bar", barData, barLayout)
   });
 }
